@@ -1,0 +1,3 @@
+update urllist u, htdocs h 
+set u.publishtime = h.publishtime 
+where u.url = h.url and h.url is not null

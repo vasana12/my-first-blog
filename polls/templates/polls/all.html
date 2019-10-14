@@ -1,0 +1,140 @@
+{%  extends "polls/base.html" %}
+
+{% block content %}
+   <div class="container-fluid ">
+    <form id="allForm" class="form_start" action="{% url 'polls:submit' %}" method="POST" >
+                   {% csrf_token %}
+   <div class='left-box'>
+
+     <div class="container-fluid container-custom-all">
+
+          <div class="row" >
+
+              <div class="col">
+                    <!-- Multiple inputs -->
+                  <p><strong>KeywordA</strong></p>
+                  <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Input</span>
+                    </div>
+                    <input name="keywordA" type="text" class="form-control" placeholder="KeywordA">
+                    <input type="hidden" name="ByWhat" value="ByAll">
+                  </div>
+
+
+            <p><strong>ChannelA</strong></p>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelA" value= "Naver_Blog"> <span class="label-text">NaverBlog</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelA" value= "Instagram"> <span class="label-text">Instagram</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelA" value="YouTube"> <span class="label-text">YouTube</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelA" value="Twitter"> <span class="label-text">Twitter</span>
+               </label>
+            </div>
+                    <div class="form-group">
+                    <p><strong>PeriodA</strong></p>
+                        <label >start</label>
+                       <input type="date" name="aday" max="3000-12-31"
+                            min="1000-01-01" class="form-control">
+                    </div>
+                      <div class="form-group">
+                    <label >end</label>
+                     <input type="date" name="aday" max="3000-12-31"
+                            min="1000-01-01" class="form-control">
+                    </div>
+
+              <p><strong>quantity</strong></p>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                </div>
+                <input name="nUrl" type="number" class="form-control" placeholder="the number of urls to scrape">
+              </div>
+
+
+                </div>
+        </div>
+        </div>
+
+   </div>
+    <div class='right-box'>
+            <div class="container-fluid container-custom-all">
+
+          <div class="row">
+
+              <div class="col">
+                   <!-- Multiple inputs -->
+                  <p><strong>KeywordB</strong></p>
+                  <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Input</span>
+                    </div>
+                     <input name="keywordB" type="text" class="form-control" placeholder="KeywordB">
+
+                  </div>
+
+
+            <p><strong>ChannelB</strong></p>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelB" value= "Naver_Blog"> <span class="label-text">NaverBlog</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelB" value= "Instagram"> <span class="label-text">Instagram</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelB" value="YouTube"> <span class="label-text">YouTube</span>
+               </label>
+            </div>
+            <div class="form-check">
+               <label>
+                  <input type="checkbox" name="channelB" value="Twitter"> <span class="label-text">Twitter</span>
+               </label>
+            </div>
+
+
+                    <div class="form-group">
+                    <p><strong>PeriodB</strong></p>
+                        <label >start</label>
+                       <input type="date" name="bday" max="3000-12-31"
+                            min="1000-01-01" class="form-control">
+                    </div>
+                      <div class="form-group">
+                    <label >end</label>
+                     <input type="date" name="bday" max="3000-12-31"
+                            min="1000-01-01" class="form-control">
+                    </div>
+
+            <p><strong>quantity</strong></p>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                </div>
+                <input name="nUrl" type="text" class="form-control" placeholder="the number of urls to scrape">
+              </div>
+
+                </div>
+        </div>
+        </div>
+
+    </div>
+<div class="button-form" id="button_crawling" style="text-align:center;">
+                    <button id="button_all" type="submit" class="btn btn-outline-primary">Submit</button>
+                </div>
+         </form>
+   </div>
+{% endblock content %}

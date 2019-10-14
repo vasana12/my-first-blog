@@ -1,0 +1,22 @@
+{%  extends "polls/base_test_before.html" %}
+{% block content %}
+ <div class="container-fluid">
+
+ {%  load staticfiles %}
+
+<p>WordCloud</p>
+    <p>{{ choice.id }}
+    </p>
+ <p>{{ choice.keywordA }}
+    </p>
+ <p>{{ choice.keywordB }}
+    </p>
+ <p>{{ choice.periodA }}
+    </p>
+ <p>{{ choice.periodA }}
+    </p>
+ <p>{{ choice.channelA }}
+    </p>
+
+ </div>
+{% endblock content %}

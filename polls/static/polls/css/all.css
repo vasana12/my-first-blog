@@ -1,0 +1,98 @@
+.left-box {
+    float: left;
+    width: 50%;
+}
+.right-box {
+  float: right;
+  width: 50%;
+}
+.left-box.div_test {
+    float: left;
+    width: 40%;
+    padding: 10px;
+    border:1px solid gainsboro;
+    border-radius:10px;
+}
+.right-box.div_test {
+    float: right;
+    width: 40%;
+    padding: 10px;
+    border:1px solid gainsboro;
+    border-radius:10px;
+}
+.col-6.div_test2{
+    padding-top: 20px;
+    padding-right: 25px;
+    padding-bottom: 20px;
+    padding-left: 25px;
+    border:1px solid gainsboro;
+    border-radius:10px;
+}
+.row.button_div_test{
+    padding: 20px;
+}
+.container-fluid.container-custom-all{
+    width: 60%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 110px;
+    margin-bottom: 80px;
+    margin-right: auto;
+    margin-left: auto;
+    border:1px solid gainsboro;
+    border-radius:10px;
+}
+.container-fluid.container-custom-keyword{
+    width: 60%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 110px;
+    margin-bottom: 80px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-fluid.container-custom-channel{
+    width: 60%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 110px;
+    margin-bottom: 80px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-fluid.container-custom-period{
+    width: 60%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 110px;
+    margin-bottom: 80px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-fluid.container-bottom-test{
+    width: 60%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 110px;
+    margin-bottom: 80px;
+    margin-right: auto;
+    margin-left: auto;
+    border:1px solid gainsboro;
+    border-radius:10px;
+}
+.container-fluid.word_cloud{
+    padding-top: 30px;
+}
+.word_cloud{
+    font-size: 15px;
+}
+.search_results{
+    font-size: 15px;
+}
+
+#content.content-custom{
+    background-color: white;
+}

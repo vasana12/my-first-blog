@@ -1,0 +1,116 @@
+{%  extends "polls/base.html" %}
+{% block content %}
+
+    <div class="container-fluid">
+        <form id="channelForm" class="form_start" action="{% url 'polls:submit' %}" method="POST" >
+                  {% csrf_token %}
+
+                    <div class="row" style="height: 100px; ">
+                    <!-- 정확히 3등분 -->
+                        <div class="col-4 first"></div>
+                        <div class="col-4 first"></div>
+                        <div class="col-4 first"></div>
+                    </div>
+
+                    <div class="row" style="height: 210px; ">
+                    <!-- 정확히 2등분 -->
+
+                            <div class="col-3 first"></div>
+                            <div class="col-6">
+                                    <div class='left-box div_test'>
+                                    <p><strong>ChannelA</strong></p>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelA" value= "Naver_Blog"> <span class="label-text">NaverBlog</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelA" value= "Instagram"> <span class="label-text">Instagram</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelA" value="YouTube"> <span class="label-text">YouTube</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelA" value="Twitter"> <span class="label-text">Twitter</span>
+                                        </label>
+                                    </div>
+                                    </div>
+                                    <div class='right-box div_test'>
+                                          <p><strong>ChannelB</strong></p>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelB" value= "Naver_Blog"> <span class="label-text">NaverBlog</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelB" value= "Instagram"> <span class="label-text">Instagram</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelB" value="Facebook"> <span class="label-text">Facebook</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label>
+                                            <input type="checkbox" name="channelB" value="Twitter"> <span class="label-text">Twitter</span>
+                                        </label>
+                                    </div>
+                                    </div>
+                                </div>
+                                <div class="col-3 third"></div>
+                    </div>
+                    <div class="row h-100" style="height: 100px;">
+                    <!-- 정확히 3등분 -->
+                        <div class="col-3"></div>
+                        <div class="col-6 div_test2">
+                                <p><strong>Keyword</strong></p>
+                              <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Input</span>
+                                </div>
+                                <input name="keywordA" type="text" class="form-control" placeholder="Keyword">
+                                <input type="hidden" name="ByWhat" value="ByChannel">
+                              </div>
+                                <div class="form-group">
+                                <p><strong>Period</strong></p>
+                                    <label >start</label>
+                                   <input type="date" name="aday" max="3000-12-31"
+                                        min="1000-01-01" class="form-control">
+                                </div>
+                                  <div class="form-group">
+                                <label >end</label>
+                                 <input type="date" name="aday" max="3000-12-31"
+                                        min="1000-01-01" class="form-control">
+                                </div>
+
+                                  <p><strong>quantity</strong></p>
+                                  <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                    </div>
+                                    <input name="nUrl" type="number" class="form-control" placeholder="the number of urls to scrape">
+                                  </div>
+                                    </div>
+                        <div class="col-3"></div>
+                    </div>
+
+                    <div class="row button_div_test" style="height: 100px; ">
+                    <!-- 정확히 3등분 -->
+                        <div class="col-3 first"></div>
+                        <div class="col-6 first">
+                            <div class="button-form" id="button_crawling" style="text-align:center;">
+                            <button id="button_keyword" type="submit" class="btn btn-outline-primary">Submit</button>
+				            </div>
+                        </div>
+                        <div class="col-3 first"></div>
+                    </div>
+
+        </form>
+    </div>
+{% endblock content %}

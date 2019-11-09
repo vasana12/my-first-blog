@@ -17,7 +17,8 @@ import re
 
 class InstagramLister:
 
-    def __init__(self, nUrl, keyword, channel):
+    def __init__(self, nUrl, keyword, channel,id ):
+        self.id = id
         self.nUrl = nUrl
         self.keyword = keyword
         self.channel = channel
@@ -75,9 +76,9 @@ class InstagramLister:
             curs.execute(sql0)
             rows = curs.fetchall()
             if len(rows)<1 :
-                sql = "insert into urllist(keyword, channel, accesstime, url, crawled) " \
-                              + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
-                              (self.keyword, self.channel, dtStr, Url, 'F')
+                sql = "insert into urllist(polls_id ,keyword, channel, accesstime, url, crawled) " \
+                              + "values (%d,\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
+                              (self.id ,self.keyword, self.channel, dtStr, Url, 'F')
                 curs.execute(sql)
             conn.commit()
 
@@ -87,10 +88,10 @@ class InstagramLister:
 class InstagramCrawler:
 
 
-    def __init__(self, keyword, channel):
+    def __init__(self, keyword, channel,id):
         self.keyword = keyword
         self.channel = channel
-
+        self.id = id
 
     def cleanse(self, text):
 
@@ -285,9 +286,9 @@ class InstagramCrawler:
                     print(i, cText, pubtime)
                 #sys.exit(1)
                 
-                sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role)" \
-                              + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\')" % \
-                              (self.keyword, self.channel, url, dtStr, pubtimeArticle, article, 'article')
+                sql = "insert into htdocs(polls_id ,keyword, channel, url, accesstime, publishtime, htmltext, role)" \
+                              + "values (%d,\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\')" % \
+                              (self.id ,self.keyword, self.channel, url, dtStr, pubtimeArticle, article, 'article')
             
                 curs.execute(sql)
                 conn.commit()
@@ -296,9 +297,9 @@ class InstagramCrawler:
                     pubtime = pubtimeComments[i]
                     cText = self.cleanse(cmt)
                     if len(cText) !=0:
-                        sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role)" \
-                          + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\')" % \
-                          (self.keyword, self.channel, url, dtStr, pubtime, cText, 'comment')
+                        sql = "insert into htdocs(polls_id, keyword, channel, url, accesstime, publishtime, htmltext, role)" \
+                          + "values (%d ,\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\')" % \
+                          (self.id, self.keyword, self.channel, url, dtStr, pubtime, cText, 'comment')
                         curs.execute(sql)
                 conn.commit()
 

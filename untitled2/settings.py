@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'untitled2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'crawl_client',
+        'NAME': 'crawl',
         'USER': 'root',
         'PASSWORD': 'robot369',
         'HOST':'106.246.169.202',

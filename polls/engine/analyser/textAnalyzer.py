@@ -6,14 +6,16 @@ from konlpy.tag import Okt
 from konlpy.tag import Kkma
 from konlpy.tag import Komoran
 from konlpy.tag import Hannanum
-from eunjeon import Mecab
+from konlpy.tag import Mecab
 from konlpy.tag import Twitter
 from operator import itemgetter
 import pandas as pd
+import gc
+import os
 
 class TextAnalyzer:
 
-    def __init__(self, keyword, channel, startDate, endDate, nlpEngine):
+    def __init__(self, keyword, channel, startDate, endDate, nlpEngine, nUrl):
 
         self.keyword = keyword
         self.channel = channel
@@ -22,31 +24,33 @@ class TextAnalyzer:
 
         self.nlpEngine = nlpEngine
 
-        if nlpEngine == "Okt" :
-            self.konlpy = Okt()
-        elif nlpEngine == "Komoran" :
-            self.konlpy = Komoran()
-        elif nlpEngine == "Kkma" :
-            self.konlpy = Kkma()
-        elif nlpEngine == "Hannanum" :
-            self.konlpy = Hannanum()
-        elif nlpEngine == "Mecab" :
-            self.konlpy = Mecab()
-        elif nlpEngine == "Twitter" :
-            self.konlpy = Twitter()
-        else :
-            self.konlpy = Okt()
+        self.nUrl = nUrl
+        self.dir = os.path.dirname(os.path.realpath(__file__))
 
+        if nlpEngine == "Okt":
+            self.konlpy = Okt()
+        elif nlpEngine == "Komoran":
+            self.konlpy = Komoran()
+        elif nlpEngine == "Kkma":
+            self.konlpy = Kkma()
+        elif nlpEngine == "Hannanum":
+            self.konlpy = Hannanum()
+        elif nlpEngine == "Mecab":
+            self.konlpy = Mecab()
+        elif nlpEngine == "Twitter":
+            self.konlpy = Twitter()
+        else:
+            self.konlpy = Okt()
 
     def kano_read(self):
-        conn =pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                              db='crawl', charset='utf8mb4')
-#192.168.0.105
-#106.246.169.202
+        conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
+                               db='crawl', charset='utf8mb4')
+        # 192.168.0.105
+        # 106.246.169.202
         curs = conn.cursor(pymysql.cursors.DictCursor)
         print("db진입")
 
-        sql = "select * from htdocs where keyword= \'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' limit 3000" % \
+        sql = "select * from htdocs where keyword= \'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' limit 2000" % \
               (self.keyword, self.channel, self.startDate, self.endDate)  ####해당 keyword 가 들어가있는 text 를 가져온다
 
         # ('%' + self.keyword + '%', self.channel, self.startDate, self.endDate)  ####해당 keyword 가 들어가있는 text 를 가져온다
@@ -55,83 +59,85 @@ class TextAnalyzer:
         print("executeSQL")
 
         rows = curs.fetchall()
-        list=[]
-        self.text =''
+        list = []
+        self.text = ''
         for row in rows:
             self.text += row['htmltext']
+            list.append(row['htmltext'])
         conn.close()
+        return list
+
+    def record(self):
+        db = 'crawl' if self.channel != 'Naver News' else 'naver_news'
+        conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
+                               db=db, charset='utf8mb4')
 
     def read(self):
+        db = 'crawl' if self.channel != 'Naver News' else 'naver_news'
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl', charset='utf8mb4')
+                               db=db, charset='utf8mb4')
         # 106.246.169.202
         # 192.168.0.105
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        sql = "select * from htdocs where keyword=\'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' limit 3000" % \
-              (self.keyword, self.channel, self.startDate, self.endDate)
+        sql = "select * from htdocs where keyword=\'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' limit %d" % \
+              (self.keyword, self.channel, self.startDate, self.endDate, self.nUrl)
+        print('sql=', sql)
         curs.execute(sql)
 
         rows = curs.fetchall()
         self.text = ''
-        print(self.keyword,len(rows))
+        print(self.keyword, len(rows))
         for row in rows:
             self.text += row['htmltext']
         print('read finish')
         conn.close()
 
-
-
     def cleanse(self):
         self.text = re.sub(u"(http[^ ]*)", " ", self.text)
-        self.text = re.sub(u"@(.)*\s"," ", self.text)
+        self.text = re.sub(u"@(.)*\s", " ", self.text)
         self.text = re.sub(u"#", "", self.text)
         self.text = re.sub(u"\\d+", " ", self.text)
         self.text = re.sub(u"[^가-힣A-Za-z]", " ", self.text)
         self.text = re.sub(u"\\s+", " ", self.text)
-        
 
-
-
-    def removeCommonWords(self) :
-        if self.channel == "Instagram" :
-            self.keywordList = ["인스타그램", "인스타", "팔로우","맞팔","인친","셀스타그램" ,"그램","스타"]
-        elif self.channel == "Naver Blog" :
-            self.keywordList = ["포스팅","블로그","댓글","이웃추가"]
-        elif self.channel == "Twitter" :
-            self.keywordList = ["트윗","RT","트위터"]
-        else :
+    def removeCommonWords(self):
+        if self.channel == "Instagram":
+            self.keywordList = ["인스타그램", "인스타", "팔로우", "맞팔", "인친", "셀스타그램", "그램", "스타"]
+        elif self.channel == "Naver Blog":
+            self.keywordList = ["포스팅", "블로그", "댓글", "이웃추가"]
+        elif self.channel == "Twitter":
+            self.keywordList = ["트윗", "RT", "트위터"]
+        if self.channel == "Naver News":
+            self.keywordList = ["없음", "헤럴드", "역필", "투데이", "머니", "코리아", "기자", "오마이", "구독", "연합", "채널", "네이버", "뉴시스",
+                                "금지", "저작", "무단", "뉴스", "재배포"]
+        else:
             self.keywordList = []
 
-        #self.keywordList.append(self.keyword)
+        # self.keywordList.append(self.keyword)
 
         for keyword in self.keywordList:
             self.text = re.sub(keyword, " ", self.text)
 
-
-
     def posTag(self):
-        print("Getting Meaningful Words for "+self.keyword+"...", end="\t")
+        print("Getting Meaningful Words for " + self.keyword + "...", end="\t")
 
         pos = self.konlpy.pos(self.text)
-
-
-        print("Pos tagging complete. Extracting Nouns, Adjectives, Exclamations ...")
-
         words = []
         for p in pos:
-            if p[1] in ['NNG', 'NNP']:  # 코모란, Mecab 기준임
-# 'VA', 'IC' 위에 대괄호 안에 추가하면 된다
-            #if p[1] in ['Noun', 'ProperNoun']:  # Okt, Twitters
-#'Noun', 'ProperNoun', 'Adjective', 'Exclamation' 위에 대괄호 안에 추가하면 된다!
-                #print(p[0],p[1])
+            # if p[1] in ['NNG', 'NNP']:  # 코모란, Mecab 기준임
+            if p[1] in ['Noun', 'ProperNoun']:  # 코모란, Mecab 기준임
+
+                # 'VA', 'IC' 위에 대괄호 안에 추가하면 된다
+                # 'Noun', 'ProperNoun', 'Adjective', 'Exclamation' 위에 대괄호 안에 추가하면 된다!
+                # print(p[0],p[1])
                 words.append(p[0])
 
         print("Extracting complete.")
 
         return words
-        
+
     def func(self, x):
-        if x[1]>1:
+        if x[1] > 1:
             return x
         else:
             return None
@@ -148,17 +154,58 @@ class TextAnalyzer:
         c = list(filter(lambda x: len(x[0]) >= 2, c))
 
         ###key list 엑셀에 추가
-        df_key = pd.read_excel('function_keyword/function_keyword.xlsx', sheet_name='세탁기')  ## 매칭할 keyword list 를 가지고 있는 문서
-        basic_keylist = []
-        for i in df_key['keyword']:  # keyword_list keylist 변수에 저장한다.
-            basic_keylist.append(i)
-        compare_list = []             #비교대상 년도의 빈도수를 뽑는다
-        for i in c :
-                compare_dict = {'keyword': i[0], 'count':i[1], 'basic_differentiate': 1 if i[0] in basic_keylist else 0}       #기준년도 keylist 와 일치하는 keyword 를 찾고 식별값을 부여한다(일치: 1 불일치: 0)
-                compare_list.append(compare_dict)                                                                                  #list에 추가한다.
-        compare_list_table =  pd.DataFrame(compare_list,columns=('keyword','count','basic_differentiate'))                         #엑셀에 저장하기 위해 keyword, count, basic_dfferntiate(식별값) 으로 칼럼을 만든다
-        compare_list_table.to_excel('keyword_sentiment_matching/'+self.keyword+'num_list'+'_'+self.startDate+'~'+self.endDate+'.xlsx', encoding="utf-8", index=True) #엑셀에 저장한다. 대상 키워드와 비교년도 를 제목으로 하는 파일 생성
+        # df_key = pd.read_excel('keyword_sentiment_matching\광진구num_list_2010-07-01~2018-06-30.xlsx', sheet_name='Sheet1')  ## 매칭할 keyword list 를 가지고 있는 문서
+        # basic_keylist = []
+        # q=0
+        # for i in df_key['keyword']:  # keyword_list keylist 변수에 저장한다.
+        #     basic_keylist.append(i)
+        #     q = q+1
+        #     if q>100:
+        #         break
+        db_diction = {}
+        compare_list = []  # 비교대상 년도의 빈도수를 뽑는다
+        q = 0
+        for i in c:
+            # compare_dict = {'keyword': i[0], 'count':i[1], 'basic_differentiate': 1 if i[0] in basic_keylist else 0}       #기준년도 keylist 와 일치하는 keyword 를 찾고 식별값을 부여한다(일치: 1 불일치: 0)
+            # compare_list.append(compare_dict)
+            compare_dict = {'keyword': i[0], 'count': i[1]}  # 기준년도 keylist 와 일치하는 keyword 를 찾고 식별값을 부여한다(일치: 1 불일치: 0)
+            compare_list.append(compare_dict)
+            # list에 추가한다.
 
+            # DB에 추가하기 위해 사전 {'K': 'V'} 사전 형태 만들어주기
+            if q < 300:
+                db_diction[i[0]] = i[1]
+            q += 1
+
+        db_diction = str(db_diction)
+        db_diction = db_diction.replace("'", "")
+        # print(db_diction)
+        # print("type(db_diction)=", type(db_diction))
+        compare_list_table = pd.DataFrame(compare_list, columns=(
+            'keyword', 'count'))  # 엑셀에 저장하기 위해 keyword, count, basic_dfferntiate(식별값) 으로 칼럼을 만든다
+
+        # 'keyword_sentiment_matching/' +
+        compare_list_table.to_excel(self.dir+"\\"+"keyword_sentiment_matching\\"+self.keyword + 'num_list' + '_' + self.startDate + '~' + self.endDate + '.xlsx',
+            encoding="utf-8", index=True)  # 엑셀에 저장한다. 대상 키워드와 비교년도 를 제목으로 하는 파일 생성
+
+        ##DB 에 키워드와 빈도수 리스트 저장하기
+        db = 'crawl'
+        conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
+                               db=db, charset='utf8mb4')
+        # 106.246.169.202
+        # 192.168.0.105
+        curs = conn.cursor(pymysql.cursors.DictCursor)
+        sql0 = "select * from polls_keyword_number where keyword=\'%s\' and channel=\'%s\' and stdate=\'%s\' and endate=\'%s\' and nurl=%d"%\
+               (self.keyword, self.channel, self.startDate, self.endDate, self.nUrl)
+        curs.execute(sql0)
+        rows = curs.fetchall()
+        if len(rows)==0:
+            sql = "insert into polls_keyword_number(keyword, channel,stdate, endate, nurl, top300)" \
+                  + "values (\'%s\', \'%s\', \'%s\',\'%s\', %d, \'%s\')" % \
+                  (self.keyword, self.channel, self.startDate, self.endDate, self.nUrl, db_diction)
+            curs.execute(sql)
+            conn.commit()
+        conn.close()
         c.sort(key=itemgetter(1), reverse=True)
 
         self.freqWordList = []
@@ -191,7 +238,7 @@ class TextAnalyzer:
             dict_list.append(dict)
         return dict_list, function_list
 
-    def make_pharse(self, pharse_list, keyword_list, function, ntotal ):
+    def make_pharse(self, pharse_list, keyword_list, function, ntotal):
 
         good_text = []
         for i in pharse_list:
@@ -208,9 +255,10 @@ class TextAnalyzer:
             'pharse/' + 'pharse_' + self.keyword + '_' + function + '_' + self.startDate + '~' + self.endDate + '_' + str(
                 ntotal) + '.xlsx',
             sheet_name=self.keyword, engine='xlsxwriter')
+        # total_text = self.text
         return total_text
 
-    def make_value_table(self,df_group_by):
+    def make_value_table(self, df_group_by):
 
         df_dict = df_group_by.to_dict()
         column_list = df_dict['count'].keys()
@@ -282,27 +330,76 @@ class TextAnalyzer:
                       '부정': total_neg}
         value_dict_list.append((value_dict))
 
-        value_dict = {'놀람': str(round(sum_surprise/total_total *100,2))+'%',
-                      '기쁨': str(round(sum_happy/total_total *100,2))+'%',
-                      '기대': str(round(sum_anticipate/total_total *100,2))+'%',
-                      '신뢰': str(round(sum_trust/total_total *100,2))+'%',
-                      '분노': str(round(sum_angry/total_total *100,2))+'%',
-                      '혐오': str(round(sum_disgust/total_total *100,2))+'%',
-                      '슬픔': str(round(sum_sad/total_total *100,2))+'%',
-                      '두려움': str(round(sum_fear/total_total *100,2))+'%',
+        value_dict = {'놀람': str(round(sum_surprise / total_total * 100, 2)) + '%',
+                      '기쁨': str(round(sum_happy / total_total * 100, 2)) + '%',
+                      '기대': str(round(sum_anticipate / total_total * 100, 2)) + '%',
+                      '신뢰': str(round(sum_trust / total_total * 100, 2)) + '%',
+                      '분노': str(round(sum_angry / total_total * 100, 2)) + '%',
+                      '혐오': str(round(sum_disgust / total_total * 100, 2)) + '%',
+                      '슬픔': str(round(sum_sad / total_total * 100, 2)) + '%',
+                      '두려움': str(round(sum_fear / total_total * 100, 2)) + '%',
                       '긍정': str(round(total_pos / total_total * 100, 2)) + '%',
                       '부정': str(round(total_neg / total_total * 100, 2)) + '%'}
         value_dict_list.append((value_dict))
 
-
         print(value_dict_list)
         value_table = pd.DataFrame(value_dict_list,
                                    columns=('놀람', '기쁨', '기대', '신뢰', '분노', '혐오', '슬픔', '두려움', '긍정', '부정'),
-                                   index=['경제적가치', '기능적가치', '사회적가치', '학습적가치', '감성적가치', '환경적가치', 'total','total_rate'])
+                                   index=['경제적가치', '기능적가치', '사회적가치', '학습적가치', '감성적가치', '환경적가치', 'total', 'total_rate'])
 
         return value_table
 
-    def matching_sentiment(self, ntotal):
+    def matching_sentiment_naver(self, ntotal):
+
+        self.read()
+        self.text = re.sub(u"(http[^ ]*)", " ", self.text)
+        self.text = re.sub(u"@(.)*\s", " ", self.text)
+        self.text = re.sub(u"#", "", self.text)
+        self.text = re.sub(u"\\d+", " ", self.text)
+        self.removeCommonWords()
+
+        pharse_list = self.text.split('.')
+        df_sentiment_keyword = pd.read_excel('sent_dict/value_sentiment.xlsx', sheet_name='Sheet1')
+
+        dict_list, function_list = self.make_function_excel()  ##function 과 keyword 맵 dict 와 fucntion list 를 받아온다.
+
+        n = 0
+        sheet_list = []
+        while n < len(function_list):  ##각 기능별로 매칭 키워드를 찾는 과정       ##function_list 수만큼 진행
+            matching_keyword = []
+            matching_count = []
+            function = function_list[n]  # 기능을 하나 가지고온다
+            print('function', function)
+
+            keyword_list = []
+            for i, val in enumerate(dict_list):  #
+                if dict_list[i].get('function') == function:  # list 에서 해당 기능과 동일한 값 기능을 가진 row 가 있으면
+                    keyword_list.append(dict_list[i].get('keyword'))  # keyword 키값에 해당하는 value 를 keyword_list 에 추가해준다
+            print('function,keyword_list', function, keyword_list)
+
+            total_text = self.make_pharse(pharse_list, keyword_list, function,
+                                          ntotal)  ### 해당 기능에 대한 키워드가 들어있는 문장을 전부 가져온다
+            sentiment_dict_list = []
+            for i, keyword in enumerate(df_sentiment_keyword['keyword']):  ##감정 사전에서 감정 키워드를 가져온다
+                count = total_text.count(keyword)  ##기능을 가지고 있는 문장과 감정 키워드 매칭과정
+                matching_keyword.append(keyword)  ##count 함수를 이용하여 해당 문장에 keyword 수를 가져온다.
+                matching_count.append(count)
+                sentiment_dict = {'keyword': keyword, 'type': df_sentiment_keyword['type'][i],
+                                  'count': count}  # keyword, tyoe, count 사전을 만든다 type= A1 A2 B1 B2 --- 이런식
+                sentiment_dict_list.append(sentiment_dict)
+                print(keyword, count)
+            df_matching = pd.DataFrame(sentiment_dict_list, columns=(
+            'keyword', 'type', 'count'))  ##excel 로 만들어 주기 위한 과정 keyword,type , count 와
+
+            df_group_by = df_matching.groupby(by='type', group_keys='count').sum()  ##tyoe 기준으로 group by 하여 sum 을 해준다.
+
+            value_table = self.make_value_table(df_group_by)  ##6X8 표를 만들어주는 과정
+            final_df = df_matching.sort_values(by='count', ascending=False)  ##감정사전 용어의 분류와 count 가 나와있는 dataframe
+            sheet_list.append((value_table, final_df, function))  ##sheet 를 만들어주기 위해 리스트에 추가한다
+            n = n + 1
+        self.make_total_excel(sheet_list, ntotal)  ###keyword 엑셀파일이 만들어진다.각 기능별로 sheet가 만들어짐(6x8 기능, count 기능)
+
+    def matching_sentiment_youtube(self, ntotal):
 
         self.kano_read()
         self.text = re.sub(u"(http[^ ]*)", " ", self.text)
@@ -312,12 +409,12 @@ class TextAnalyzer:
         self.removeCommonWords()
 
         pharse_list = self.text.split('.')
-        df_sentiment_keyword = pd.read_excel('가치_감성 키워드_new.xlsx', sheet_name='Sheet1')
+        df_sentiment_keyword = pd.read_excel('vlaue_sentiment.xlsx', sheet_name='Sheet1')
 
-        dict_list ,function_list = self.make_function_excel()                   ##function 과 keyword 맵 dict 와 fucntion list 를 받아온다.
+        dict_list, function_list = self.make_function_excel()  ##function 과 keyword 맵 dict 와 fucntion list 를 받아온다.
 
         n = 0
-        sheet_list=[]
+        sheet_list = []
         while n < len(function_list):  ##각 기능별로 매칭 키워드를 찾는 과정       ##function_list 수만큼 진행
 
             matching_keyword = []
@@ -329,24 +426,27 @@ class TextAnalyzer:
                     keyword_list.append(dict_list[i].get('keyword'))  # keyword 키값에 해당하는 value 를 keyword_list 에 추가해준다
             print('function,keyword_list', function, keyword_list)
 
-            total_text = self.make_pharse(pharse_list, keyword_list, function, ntotal)      ### 해당 기능에 대한 키워드가 들어있는 문장을 전부 가져온다
+            total_text = self.make_pharse(pharse_list, keyword_list, function,
+                                          ntotal)  ### 해당 기능에 대한 키워드가 들어있는 문장을 전부 가져온다
             sentiment_dict_list = []
-            for i,keyword in enumerate(df_sentiment_keyword['keyword']):                                                     ##감정 사전에서 감정 키워드를 가져온다
-                count = total_text.count(keyword)                                                 ##기능을 가지고 있는 문장과 감정 키워드 매칭과정
-                matching_keyword.append(keyword)                                                  ##count 함수를 이용하여 해당 문장에 keyword 수를 가져온다.
+            for i, keyword in enumerate(df_sentiment_keyword['keyword']):  ##감정 사전에서 감정 키워드를 가져온다
+                count = total_text.count(keyword)  ##기능을 가지고 있는 문장과 감정 키워드 매칭과정
+                matching_keyword.append(keyword)  ##count 함수를 이용하여 해당 문장에 keyword 수를 가져온다.
                 matching_count.append(count)
-                sentiment_dict = {'keyword': keyword, 'type': df_sentiment_keyword['type'][i], 'count': count}      #keyword, tyoe, count 사전을 만든다 type= A1 A2 B1 B2 --- 이런식
+                sentiment_dict = {'keyword': keyword, 'type': df_sentiment_keyword['type'][i],
+                                  'count': count}  # keyword, tyoe, count 사전을 만든다 type= A1 A2 B1 B2 --- 이런식
                 sentiment_dict_list.append(sentiment_dict)
                 print(keyword, count)
-            df_matching = pd.DataFrame(sentiment_dict_list, columns=('keyword', 'type', 'count'))                       ##excel 로 만들어 주기 위한 과정 keyword,type , count 와
+            df_matching = pd.DataFrame(sentiment_dict_list, columns=(
+            'keyword', 'type', 'count'))  ##excel 로 만들어 주기 위한 과정 keyword,type , count 와
 
-            df_group_by = df_matching.groupby(by='type', group_keys='count').sum()                                      ##tyoe 기준으로 group by 하여 sum 을 해준다.
+            df_group_by = df_matching.groupby(by='type', group_keys='count').sum()  ##tyoe 기준으로 group by 하여 sum 을 해준다.
 
-            value_table= self.make_value_table(df_group_by)                                                             ##6X8 표를 만들어주는 과정
-            final_df = df_matching.sort_values(by='count', ascending=False)                                             ##감정사전 용어의 분류와 count 가 나와있는 dataframe
-            sheet_list.append((value_table, final_df, function))                                                        ##sheet 를 만들어주기 위해 리스트에 추가한다
+            value_table = self.make_value_table(df_group_by)  ##6X8 표를 만들어주는 과정
+            final_df = df_matching.sort_values(by='count', ascending=False)  ##감정사전 용어의 분류와 count 가 나와있는 dataframe
+            sheet_list.append((value_table, final_df, function))  ##sheet 를 만들어주기 위해 리스트에 추가한다
             n = n + 1
-        self.make_total_excel(sheet_list, ntotal)                                                                               ###keyword 엑셀파일이 만들어진다.각 기능별로 sheet가 만들어짐(6x8 기능, count 기능)
+        self.make_total_excel(sheet_list, ntotal)  ###keyword 엑셀파일이 만들어진다.각 기능별로 sheet가 만들어짐(6x8 기능, count 기능)
 
     def make_total_excel(self, sheet_list, ntotal):
         writer = pd.ExcelWriter(
@@ -362,6 +462,3 @@ class TextAnalyzer:
         self.removeCommonWords()
         self.getWordCount(nRank, minOccur)
         return self.freqWordDict
-    
-
-    

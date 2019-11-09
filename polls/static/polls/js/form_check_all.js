@@ -10,14 +10,14 @@ $(document).ready(function(){
         var keywordB = $('input[name="keywordB"]').val();
         if (keywordA==""||keywordB=="")
             {
-                alert("keyword를 다시 입력해 주세요!");
+                alert("keyword를 입력해 주세요");
                 return false;
             }
         var countA = $("input:checkbox[name='channelA']:checked").length
         var countB = $("input:checkbox[name='channelB']:checked").length
-        if(countA<1||countB<1)
+        if(countA>1||countB>1)
             {
-                alert("하나 이상의 채널을 선택해 주세요.")
+                alert("하나의 채널을 선택해 주세요.")
                 return false;
             }
         var aday = $('input[name="aday"]').val();
@@ -30,6 +30,8 @@ $(document).ready(function(){
                 alert("날짜를 입력해 주세요")
                 return false;
             }
+        var nUrlA = $('input[name="nUrlA"]').val();
+        var nUrlB = $('input[name="nUrlB"]').val();
 
     })
 })

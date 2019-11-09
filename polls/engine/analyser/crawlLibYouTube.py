@@ -14,13 +14,13 @@ import requests, bs4, pymysql
 
 
 class YouTubeCrawler:
-    def __init__(self, name, channel):
+    def __init__(self, name, channel, id):
         self.MAX_VIDEOS = 20
         self.MAX_COMMENTS = 30
         self.name=name
         self.dateCalc=dateCalculator()
         self.channel = channel
-
+        self.id = id
     def openBrowser(self):
         options = Options()
         options.headless = False
@@ -51,12 +51,12 @@ class YouTubeCrawler:
 
         
 
-    def getVideoItems(self, keyword, nUrl, startDate, endDate):
+    def getVideoItems(self, keyword, nUrl, startDate, endDate ,id ):
         self.keyword = keyword
         self.MAX_VIDEOS = nUrl
         self.startDate = startDate
         self.endDate = endDate
-        
+        self.id = id
         #driver = webdriver.Firefox()
         self.driver.get("https://www.youtube.com/results?search_query=%s"%(self.keyword))
         self.driver.implicitly_wait(30)
@@ -84,7 +84,7 @@ class YouTubeCrawler:
         #items=self.driver.find_elements_by_xpath("//a[@id='video-title']")
         videoList=[]
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl_client', charset='utf8mb4')
+                               db='crawl', charset='utf8mb4')
         curs = conn.cursor()
         
         for item in items:
@@ -116,9 +116,9 @@ class YouTubeCrawler:
             print(self.name, title, url, author, views, pubTime, duration)
             print('\n')
 
-            sql = "insert into urllist(keyword, channel, stdate, endate, accesstime, url, title, publishtime, crawled) " \
-                  + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\',\'%s\' ,\'%s\', \'%s\')" % \
-                  (self.keyword, self.channel, self.startDate, self.endDate, dtStr, url, title, pubTime, 'F')
+            sql = "insert into urllist(keyword, channel, stdate, endate, accesstime, url, title, publishtime, crawled, polls_id) " \
+                  + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\',\'%s\' ,\'%s\', \'%s\', %d)" % \
+                  (self.keyword, self.channel, self.startDate, self.endDate, dtStr, url, title, pubTime, 'F', id)
             curs.execute(sql)
             conn.commit()
 
@@ -130,12 +130,13 @@ class YouTubeCrawler:
 
         return videoList
 
-    def readUrlListFromDB(self, keyword):
+    def readUrlListFromDB(self, keyword, id):
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl_client', charset='utf8mb4')
+                               db='crawl', charset='utf8mb4')
         curs = conn.cursor(pymysql.cursors.DictCursor)
-        sql = "select * from urllist where keyword=\'%s\' and channel=\'%s\' and crawled=\'%s\'" % \
-              (keyword, self.channel, 'F')
+
+        sql = "select * from urllist where keyword=\'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' and crawled=\'%s\'" % \
+              (self.keyword, self.channel, self.startDate, self.endDate, 'F')
 
         print(sql)
         curs.execute(sql)
@@ -262,36 +263,36 @@ class YouTubeCrawler:
 
     def writeDocsToDB(self, keyword, channel, contentList):
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl_client', charset='utf8mb4')
+                               db='crawl', charset='utf8mb4')
         curs = conn.cursor(pymysql.cursors.DictCursor)
 
         dtNow = datetime.now()
         dtStr = dtNow.strftime("%Y-%m-%d %H:%M:%S")
         for item in contentList:
-            sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role)" \
-                  + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\')" % \
-                  (keyword, channel, item.url, item.accessTime, item.publishTime, item.title, 'title')
+            sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role, polls_id)" \
+                  + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
+                  (keyword, channel, item.url, item.accessTime, item.publishTime, item.title, 'title', self.id )
             #print(sql)
             curs.execute(sql)
             conn.commit()
 
-            sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role)" \
-                  + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\')" % \
-                  (keyword, channel, item.url, item.accessTime, item.publishTime, item.titleDesc, 'titleDesc')
+            sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role, polls_id)" \
+                  + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
+                  (keyword, channel, item.url, item.accessTime, item.publishTime, item.titleDesc, 'titleDesc', self.id)
             #print(sql)
             curs.execute(sql)
             conn.commit()
 
             for c in item.comments:
                 cText = self.cleanse(c.text)
-                sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role)" \
-                      + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\')" % \
-                      (keyword, channel, item.url, item.accessTime, c.publishTime, cText, 'comment')
+                sql = "insert into htdocs(keyword, channel, url, accesstime, publishtime, htmltext, role, polls_id)" \
+                      + "values (\'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
+                      (keyword, channel, item.url, item.accessTime, c.publishTime, cText, 'comment', self.id)
                 #print(sql)
                 curs.execute(sql)
                 conn.commit()
 
-            sql = "update urllist set crawled=\'T\' where keyword=\'%s\' and url=\'%s\'" %(keyword, item.url)
+            sql = "update urllist set crawled=\'T\' where polls_id=%d and keyword=\'%s\' and url=\'%s\'" %(self.id, keyword, item.url)
             #print(sql)
             curs.execute(sql)
             conn.commit()

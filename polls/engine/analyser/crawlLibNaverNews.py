@@ -7,13 +7,14 @@ import re
 
 
 class NaverNewsLister:
-    def __init__(self,s_page ,maxpage, keyword, channel, stdate, endate):
+    def __init__(self,s_page ,maxpage, keyword, channel, stdate, endate, id):
         self.maxpage = maxpage
         self.keyword = keyword
         self.channel = channel
         self.stdate = stdate
         self.endate = endate
         self.s_page = s_page
+        self.id = id
         # crawler(self.maxpage, self.query, self.s_date, self.e_date)
 
 
@@ -43,19 +44,19 @@ class NaverNewsLister:
 
                     try:
                         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                                               db='naver_news', charset='utf8mb4')
+                                               db='crawl', charset='utf8mb4')
 #             192.168.0.105
                         curs = conn.cursor()
 
                         #url 으로 중복 검사하기
-                        sql0 = "select * from htdocs where url=\'" + news_detail_dict['url'] + "\' " \
+                        sql0 = "select * from naver_news where url=\'" + news_detail_dict['url'] + "\' " \
                                + "and keyword=\'"+self.keyword+"\'"
                         curs.execute(sql0)
                         rows = curs.fetchall()
                         if len(rows)==0:
-                            sql = "insert into htdocs(keyword, stdate, endate, publishtime, title, reporter, email, pcompany, channel, url, htmltext, img)"\
-                            + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
-                            (self.keyword, self.stdate, self.endate, news_detail_dict['pdate'], news_detail_dict['title'], news_detail_dict['reporter'], news_detail_dict['email'],
+                            sql = "insert into naver_news(polls_id, keyword, stdate, endate, publishtime, title, reporter, email, pcompany, channel, url, htmltext, img)"\
+                            + "values (%d,\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
+                            (self.id,self.keyword, self.stdate, self.endate, news_detail_dict['pdate'], news_detail_dict['title'], news_detail_dict['reporter'], news_detail_dict['email'],
                              news_detail_dict['pcompany'], self.channel, news_detail_dict['url'], news_detail_dict['content'], news_detail_dict['img'])
                             curs.execute(sql)
                             conn.commit()

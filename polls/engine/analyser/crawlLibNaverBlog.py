@@ -10,13 +10,15 @@ import os
 
 class NaverBlogLister:
 
-    def __init__(self, nUrl, keyword, channel, startDate, endDate):
+    def __init__(self, nUrl, keyword, channel, startDate, endDate, id):
         self.nUrl = nUrl
         self.keyword = keyword
         self.channel = channel
         self.startDate = startDate
         self.endDate = endDate
         self.dir = os.path.dirname(os.path.realpath(__file__))
+        self.id = id
+
     def getNaverBlogUrl(self, idStr, noStr):
         urlStr = 'https://blog.naver.com/PostView.nhn?blogId=%s&logNo=%s&redirect=Dlog&widgetTypeCall=true&directAccess=false' % (
         idStr, noStr)
@@ -78,10 +80,10 @@ class NaverBlogLister:
                     exG=''
                     exI= 0
 
-                
-                       
+
+
                 conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                                       db='crawl_client', charset='utf8mb4')
+                                       db='crawl', charset='utf8mb4')
 #192.168.0.105
                 curs = conn.cursor()
 
@@ -91,11 +93,11 @@ class NaverBlogLister:
                     pTimeStamp = d['addDate']
                     publishTime = datetime.fromtimestamp(pTimeStamp / 1e3)
 
-                    
-                   
 
 
-                    
+
+
+
                     now = datetime.now()
                     dtStr = now.strftime("%Y-%m-%d %H:%M:%S")
                     print(dtStr)
@@ -109,9 +111,9 @@ class NaverBlogLister:
                     rows = curs.fetchall()
                     print(rows,len(rows))
                     if len(rows)==0:
-                        sql = "insert into urllist(keyword, channel, stdate, endate, accesstime, url, publishtime, crawled) " \
-                              + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\',\'%s\' ,\'%s\')" % \
-                              (self.keyword, self.channel, self.startDate, self.endDate, dtStr, blogUrl, publishTime, 'F')
+                        sql = "insert into urllist(keyword, channel, stdate, endate, accesstime, url, publishtime, crawled, polls_id) " \
+                              + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\',\'%s\' ,\'%s\', %d)" % \
+                              (self.keyword, self.channel, self.startDate, self.endDate, dtStr, blogUrl, publishTime, 'F', self.id)
                         curs.execute(sql)
                         conn.commit()
                     nArticle += 1
@@ -128,8 +130,8 @@ class NaverBlogLister:
                     if (nArticle >= self.nUrl):
                         break
 #중복되는거 크롤링 안하게 세팅
-                    
-                        
+
+
             else:
                 print("Error reading " + url)
                 er += 1
@@ -145,7 +147,7 @@ class NaverBlogLister:
                     #sleep 추가하면 막힌거 다시 뚫을 수 있을수도 아니면 평균개수로 끊기..3000개로 안되는듯 , 엑셀 업데이트 되는거 다시확
             pageNo += 1
 
-           
+
             if (nArticle >= self.nUrl):
                 break
             #중복크롤링 방지
@@ -166,11 +168,12 @@ class NaverBlogLister:
 
 class NaverBlogCrawler:
 
-    def __init__(self, keyword, channel, startDate, endDate):
+    def __init__(self, keyword, channel, startDate, endDate, id):
         self.keyword = keyword
         self.channel = channel
         self.startDate = startDate
         self.endDate = endDate
+        self.id = id
         self.nCrawled = 0;
         self.exH =''
         self.er=0;
@@ -180,8 +183,8 @@ class NaverBlogCrawler:
         print('crawling ', address)
 #####엑셀관련코드추가#####
         r = requests.get(address)
-        
-        
+
+
         if r.status_code == requests.codes.ok:
             print("접속 성공")
             t = r.text
@@ -262,13 +265,13 @@ class NaverBlogCrawler:
         bodySoup = soup.find_all('div', {'class': 'se-main-container'})
 
         print("LENGTH=%d"%(len(bodySoup)))
-        
+
         if (len(bodySoup)==0):
             bodySoup = soup.find_all('div', {'class': 'se_paragraph'})
 
         if (len(bodySoup)==0):
             bodySoup = soup.find_all('div', {'id': 'postViewArea'})
-            
+
         body = ''
         for bs in bodySoup:
             body = body + bs.getText()
@@ -318,10 +321,10 @@ class NaverBlogCrawler:
             if text.count('\n\n') == 0:
                 break
 
-        # enclosed chars 
+        # enclosed chars
         text = re.sub(u'[\u2500-\u2BEF]', '', text) # I changed this to exclude chinese char
 
-  
+
         #dingbats
         text = re.sub(u'[\u2702-\u27b0]', '', text)
 
@@ -330,14 +333,14 @@ class NaverBlogCrawler:
         text = re.sub(u'[\U0001F300-\U0001F5FF]', '', text) # symbols & pictographs
         text = re.sub(u'[\U0001F680-\U0001F6FF]', '', text) # transport & map symbols
         text = re.sub(u'[\U0001F1E0-\U0001F1FF]', '', text) # flags (iOS)
-        
+
         #text = re.sub(u'[\U0001F600-\U0001F1FF]', '', text)
 
-       
 
-        
+
+
         return text
-    
+
 
     def crawlUrlTexts(self):
         self.nCrawled = 0
@@ -345,7 +348,7 @@ class NaverBlogCrawler:
         sheet1=wb['Crawler']
 
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl_client', charset='utf8mb4')
+                               db='crawl', charset='utf8mb4')
 #106.246.169.202
         curs = conn.cursor(pymysql.cursors.DictCursor)
         sql = "select * from urllist where keyword=\'%s\' and channel=\'%s\' and publishtime>=\'%s\' and publishtime<=\'%s\' and crawled=\'%s\'" % \
@@ -365,11 +368,11 @@ class NaverBlogCrawler:
         exI=0
         exK='crawlUrlTexts'
         exL=''
-                
+
         counter=0
         for row in rows:
             # print(row)
-            
+
 
             blogUrl = row['url']
             pubTime = row['publishtime']
@@ -378,12 +381,12 @@ class NaverBlogCrawler:
             sql0="select count(*) from htdocs where url=\'" + blogUrl + "\'"\
                   + "and keyword=\'"+self.keyword+"\' "\
                   + "and publishtime=\'%s\'"%(pubTime)
- 
 
-            
+
+
             curs.execute(sql0)
             rows2 = curs.fetchall()
-            print(rows2[0]['count(*)'])  
+            print(rows2[0]['count(*)'])
             if rows2[0]['count(*)'] == 0:
                 now = datetime.now()
                 dtStr = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -398,17 +401,17 @@ class NaverBlogCrawler:
                 isCommercial = self.getIsCommercial(soup)
                 blogText = self.extractBlogText(soup)
 
-                
+
                 # print("pubdate = " +pubDate)
                 if pubTime is not None:
-                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, publishtime, nlike, nreply, iscommercial, htmltext)" \
-                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
+                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, publishtime, nlike, nreply, iscommercial, htmltext, polls_id)" \
+                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
                           (self.keyword, self.startDate, self.endDate, self.channel, blogUrl, dtStr, pubTime, nLike, nReply, isCommercial,
-                           blogText)
+                           blogText, self.id)
                 else:
-                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, nlike, nreply, iscommercial, htmltext)" \
-                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
-                          (self.keyword, self.startDate, self.endDate, self.channel, blogUrl, dtStr, nLike, nReply, isCommercial, blogText)
+                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, nlike, nreply, iscommercial, htmltext, polls_id)" \
+                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
+                          (self.keyword, self.startDate, self.endDate, self.channel, blogUrl, dtStr, nLike, nReply, isCommercial, blogText, self.id)
 
                 curs.execute(sql)
 
@@ -420,10 +423,10 @@ class NaverBlogCrawler:
             else:
                 sql = "update urllist set crawled='T' where url='%s'" % (blogUrl)\
                       + "and keyword=\'"+self.keyword+"\' "\
-                
- 
+
+
             curs.execute(sql)
-            
+
             conn.commit()
 
 
@@ -434,14 +437,14 @@ class NaverBlogCrawler:
                 for i in range(1,2,1):
                     exG=dtStr
                     print(exG)
-                    
+
 
             counter += 1
 
             if counter==1000:
                 sleep(30)
                 counter=0
-            
+
          ##excel upload##
         now = datetime.now()
         endtStr = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -458,10 +461,10 @@ class NaverBlogCrawler:
         wb = openpyxl.load_workbook(self.dir+'/crawlstrength.xlsx')
         sheet1=wb['Crawler']
 
-        
+
 
         conn = pymysql.connect(host='106.246.169.202', user='root', password='robot369',
-                               db='crawl_client', charset='utf8mb4')
+                               db='crawl', charset='utf8mb4')
 #106.246.169.202
         curs = conn.cursor(pymysql.cursors.DictCursor)
         sql = "select * from urllist where crawled=\'F\'"
@@ -497,15 +500,15 @@ class NaverBlogCrawler:
             else:
                 sql0="select count(*) from htdocs where url=\'" + blogUrl + "\'"\
                   + "and keyword=\'"+keyword+"\'"
- 
 
-            
+
+
             curs.execute(sql0)
             rows2 = curs.fetchall()
             #print(rows2[0]['count(*)'])
-            
+
             if rows2[0]['count(*)'] == 0:
-                
+
                 now = datetime.now()
                 dtStr = now.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -519,19 +522,19 @@ class NaverBlogCrawler:
                 isCommercial = self.getIsCommercial(soup)
                 blogText = self.extractBlogText(soup)
 
-                
+
                 # print("pubdate = " +pubDate)
                 if pubTime is not None:
                     print(pubTime)
-                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, publishtime, nlike, nreply, iscommercial, htmltext)" \
-                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
+                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, publishtime, nlike, nreply, iscommercial, htmltext, polls_id)" \
+                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
                           (keyword, startDate, endDate, channel, blogUrl, dtStr, pubTime, nLike, nReply, isCommercial,
-                           blogText)
+                           blogText, self.id)
                 else:
                     print("pubTime none")
-                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, nlike, nreply, iscommercial, htmltext)" \
-                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')" % \
-                          (keyword, startDate, endDate, channel, blogUrl, dtStr, nLike, nReply, isCommercial, blogText)
+                    sql = "insert into htdocs(keyword, stdate, endate, channel, url, accesstime, nlike, nreply, iscommercial, htmltext, polls_id)" \
+                          + "values (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\',\'%s\', \'%s\', \'%s\', \'%s\', \'%s\', %d)" % \
+                          (keyword, startDate, endDate, channel, blogUrl, dtStr, nLike, nReply, isCommercial, blogText, self.id)
 
                 curs.execute(sql)
 
@@ -546,10 +549,10 @@ class NaverBlogCrawler:
             else:
                 sql = "update urllist set crawled='T' where url='%s'" % (blogUrl)\
                       + "and keyword=\'"+keyword+"\' "\
-                
- 
+
+
             curs.execute(sql)
-            
+
             conn.commit()
 
 
@@ -565,7 +568,7 @@ class NaverBlogCrawler:
                 sleep(30)
                 counter=0
 
-                         
+
          ##excel upload##
         now = datetime.now()
         endtStr = now.strftime("%Y-%m-%d %H:%M:%S")

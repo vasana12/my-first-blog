@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Breakdown
+from .models import PollsBreakdown
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from polls.engine.analyser import crawlLibNaverBlog, textAnalyzer
 from polls.engine.crawler import setting, dao
 import os
+
 
 def table(request):
     return render(request, 'polls/table.html')
@@ -37,15 +38,22 @@ def period(request):
     return render(request, 'polls/period.html')
 
 def submit(request):
-    breakdown = dao.dao(request)
 
-    setting.crawler(breakdown)
+    pollsBreakdown = dao.dao(request)
+    print('submit 진입', pollsBreakdown.id)
+    print(pollsBreakdown.channelA[0])
+    setting.crawler(pollsBreakdown)
+
+
+    ##textAnalyzer
+
     #
     # # 키워드 비교 크롤러
     #     # # 1. setting 인스턴스 생성
-    #DIR_PATH = os.path.dirname(os.path.realpath(__file__)) + "\\static\\polls\\source\\"
-    #print('DIR_PATH=', DIR_PATH)
+    DIR_PATH = os.path.dirname(os.path.realpath(__file__)) + "\\static\\polls\\source\\image"
+    print('DIR_PATH=', DIR_PATH)
 
+    setting.analyzer(pollsBreakdown, DIR_PATH)
 
     # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     #setting = Setting(DIR_PATH, select.id)
@@ -59,9 +67,9 @@ def submit(request):
     ##### URL List 생성
     # delete from urllist
     # delete from htdocs
-    return HttpResponseRedirect(reverse('polls:results', args=(breakdown.id,)))
+    return HttpResponseRedirect(reverse('polls:results', args=(pollsBreakdown.id,)))
 
 
 class ResultsView(generic.DetailView):
-    model = Breakdown
+    model = PollsBreakdown
     template_name = 'polls/results.html'

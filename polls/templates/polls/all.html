@@ -9,7 +9,6 @@
      <div class="container-fluid container-custom-all">
 
           <div class="row" >
-
               <div class="col">
                     <!-- Multiple inputs -->
                   <p><strong>KeywordA</strong></p>
@@ -19,6 +18,8 @@
                     </div>
                     <input name="keywordA" type="text" class="form-control" placeholder="KeywordA">
                     <input type="hidden" name="ByWhat" value="ByAll">
+                    <input type="hidden" name="username" value={{ authuser.username }}>
+                    <input type="hidden" name="usr_key" value={{ authuser.id }}>
                   </div>
 
 
@@ -61,7 +62,7 @@
                             min="1000-01-01" class="form-control">
                     </div>
 
-              <p><strong>quantity</strong></p>
+              <p><strong>quantity(>100)</strong></p>
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
                 </div>
@@ -131,7 +132,7 @@
                             min="1000-01-01" class="form-control">
                     </div>
 
-            <p><strong>quantity</strong></p>
+            <p><strong>quantity(>100)</strong></p>
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
                 </div>

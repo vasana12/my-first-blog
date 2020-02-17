@@ -41,12 +41,15 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">Almaden Crawling</h1>
                   </div>
+                    <form id="loginForm" class="form_start" action="{% url 'polls:login' %}" method="POST" >
+
+                   {% csrf_token %}
                   <form class="user">
                     <div class="form-group">
-                      <input type="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address...">
+                      <input type="id" name="usr_id" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="id">
                     </div>
                     <div class="form-group">
-                      <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
+                      <input type="password" name="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password">
                     </div>
                     <div class="form-group">
                       <div class="custom-control custom-checkbox small">
@@ -54,17 +57,18 @@
                         <label class="custom-control-label" for="customCheck">Remember Me</label>
                       </div>
                     </div>
-                    <a href="{% url 'polls:index' %}" class="btn btn-primary btn-user btn-block">
-                      Login
-                    </a>
+
+                      <div class="button-form" id="button_login" style="text-align:center;">
+                    <button id="button_all" type="submit" class="btn btn-primary btn-user btn-block">Login</button>
+                </div>
+                  </form>
                     <hr>
-                    <a href="index.html" class="btn btn-google btn-user btn-block">
+                    <a href="#" class="btn btn-google btn-user btn-block">
                       <i class="fab fa-google fa-fw"></i> Login with Google
                     </a>
-                    <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                    <a href="#" class="btn btn-facebook btn-user btn-block">
                       <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
                     </a>
-                  </form>
                   <hr>
                   <div class="text-center">
                     <a class="small" href="#">Forgot Password?</a>
@@ -85,12 +89,22 @@
   </div>
 
   <!-- Bootstrap core JavaScript-->
+
+  <script src="{%  static "polls/vendor/jquery/jquery.min.js" %}"></script>
+  <script src="{%  static "polls/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+
+  <!-- Bootstrap core JavaScript-->
   <script src="{%  static "polls/js/sb-admin-2.min.js" %}"></script>
   <script src="{%  static "polls/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
 
 
+
   <!-- Core plugin JavaScript-->
   <script src="{%  static "polls/vendor/jquery-easing/jquery.easing.min.js" %}"></script>
+
+  {#  id_check_js#}
+  <script src="{%  static "polls/js/form_check_login.js" %}"></script>
+
 </body>
 
 </html>

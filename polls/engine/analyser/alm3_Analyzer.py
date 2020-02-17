@@ -42,7 +42,7 @@ def alm3_analyzer(pollsBreakdown, DIR_PATH):
     print("<" + keyword1 + ">")
     print(dict1)
 
-    wc1 = WordCloudRenderer(dict1, 'Dark2')
+    wc1 = WordCloudRenderer(dict1, 'Dark2',DIR_PATH)
 
     analyzer2 = TextAnalyzer(keyword2, channelB, startDate2, \
                             endDate2, "Okt", nUrlB)
@@ -72,8 +72,8 @@ def alm3_analyzer(pollsBreakdown, DIR_PATH):
     # print("<intersection between %s and %s>" % (keyword2, keyword1))
     # print(interdict)
 
-    wc3 = WordCloudRenderer(differa, 'Dark2')
-    wc4 = WordCloudRenderer(differb, 'tab10')
+    wc3 = WordCloudRenderer(differa, 'Dark2', DIR_PATH)
+    wc4 = WordCloudRenderer(differb, 'tab10', DIR_PATH)
 
     wc3.draw(3, keyword1+'-'+keyword2)
     wc4.draw(4, keyword2+'-'+keyword1)
@@ -81,22 +81,22 @@ def alm3_analyzer(pollsBreakdown, DIR_PATH):
     ###### 벤다이어그램 ######
 
 
-    wc5 = WordCloudRenderer(interdict, 'brg')
+    wc5 = WordCloudRenderer(interdict, 'brg', DIR_PATH)
     wc5.setMask("./mask_inter.png")
 
-    wc6 = WordCloudRenderer(differa, 'Dark2')
+    wc6 = WordCloudRenderer(differa, 'Dark2', DIR_PATH)
     wc6.setMask("./mask_diff1.png")
 
-    wc7 = WordCloudRenderer(differb, 'tab10')
+    wc7 = WordCloudRenderer(differb, 'tab10', DIR_PATH)
     wc7.setMask("./mask_diff2.png")
 
     # 교집합그림#
-    plt.figure(5, figsize=(16, 12))
+    plt.figure(5, figsize=(12, 9))
     plt.imshow(wc5.getWordCloud(), interpolation='bilinear')
     plt.imshow(wc6.getWordCloud(), interpolation='bilinear')
     plt.imshow(wc7.getWordCloud(), interpolation='bilinear')
 
     plt.axis('off')
     print(DIR_PATH+'/'+keyword1+'_inter_'+keyword2)
-    plt.savefig(DIR_PATH+'/'+keyword1+'_inter_'+keyword2)
-    plt.show()
+    plt.savefig(DIR_PATH+'/wordcloud'+'/'+str(pollsBreakdown.id))
+

@@ -9,11 +9,11 @@ class WordCloudRenderer:
     def __init__(self, d, pal, DIR_PATH):
         self.dir = DIR_PATH
         self.dict = dict(d)
-        self.maskPic = np.array(Image.open(self.dir+"/"+"mask.png"))
+        self.maskPic = np.array(Image.open(self.dir+"\\"+"mask.png"))
         self.palette=pal
 
     def setMask(self, filename):
-        self.maskPic = np.array(Image.open(filename))
+        self.maskPic = np.array(Image.open(self.dir+"\\"+filename))
 
     def getWordCloud(self):
                               ## NanumBarunGothic.ttf', 
@@ -41,4 +41,4 @@ class WordCloudRenderer:
         plt.figure(index, figsize=(12, 12))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
-        plt.savefig(self.dir+'\\image\\'+keyword)
+        plt.savefig(self.dir+'\\wordcloud\\'+keyword)

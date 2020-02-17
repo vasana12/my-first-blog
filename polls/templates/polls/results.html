@@ -1,20 +1,70 @@
 {%  extends "polls/base.html" %}
-{% block content %}
- <div class="container-fluid">
- {%  load staticfiles %}
 
-<p>WordCloud</p>
-    <p>{{ pollsbreakdown.id }}
-    </p>
- <p>{{ pollsbreakdown.keywordA }}
-    </p>
- <p>{{ pollsbreakdown.keywordB }}
-    </p>
- <p>{{ pollsbreakdown.periodA }}
-    </p>
- <p>{{ pollsbreakdown.periodB }}
-    </p>
- <p>{{ pollsbreakdown.channelA }}
-    </p>
- </div>
-{% endblock content %}
+<!-- Begin Page Content -->
+{% block content %}
+
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <h1 class="h3 mb-2 text-gray-800">WordCloud List</h1>
+          <p class="mb-4">DataTables show data crawled. please click the below menu to see wordcloud</p>
+
+          <!-- DataTales Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary"></h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>keyword</th>
+                        <th>channel</th>
+                      <th>periodA</th>
+                      <th>periodB</th>
+                      <th>urlA</th>
+                      <th>urlB</th>
+
+                    </tr>
+                  </thead>
+                  <tfoot>
+                    <tr>
+                      <th>keyword</th>
+                      <th>channel</th>
+                      <th>periodA</th>
+                      <th>periodB</th>
+                      <th>urlA</th>
+                      <th>urlB</th>
+
+                    </tr>
+                  </tfoot>
+                  <tbody>
+
+                  {% if wordcloud %}
+                    {%  for word in wordcloud %}
+                        <tr>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{ word.keywordA }} vs {{ word.keywordB }}</a></td>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{ word.channelA }} vs {{ word.channelB }}</a></td>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{ word.periodA}}</a></td>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{ word.periodB }}</a></td>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{word.nUrlA}}</a></td>
+                      <td><a href="{% url 'polls:results'  word.id%}">{{word.nUrlB}}</a></td>
+
+                    </tr>
+
+                    {% endfor %}
+                  {% else %}
+
+                  <p> no data are available.</p>
+                  {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+{% endblock %}

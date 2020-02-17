@@ -40,14 +40,14 @@ class AuthPermission(models.Model):
 class AuthUser(models.Model):
     password = models.CharField(max_length=128)
     last_login = models.DateTimeField(blank=True, null=True)
-    is_superuser = models.IntegerField()
-    username = models.CharField(unique=True, max_length=150)
+    is_superuser = models.IntegerField(blank=True, null=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=150)
-    email = models.CharField(max_length=254)
-    is_staff = models.IntegerField()
-    is_active = models.IntegerField()
-    date_joined = models.DateTimeField()
+    username = models.CharField(max_length=254)
+    email = models.CharField(max_length=150)
+    is_staff = models.IntegerField(blank=True, null=True)
+    is_active = models.IntegerField(blank=True, null=True)
+    date_joined = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -213,7 +213,8 @@ class PollsBreakdown(models.Model):
     nUrlC = models.IntegerField(blank=True, db_column='nUrlC', null=True)
     saved_path = models.CharField(blank=True, max_length=200, null=True)
     saved_name = models.CharField(blank=True, max_length=200, null=True)
-    usr_id = models.BigIntegerField(blank=True, null=True)
+    usr_id = models.CharField(blank=True,db_column='usr_id',max_length=254, null=True)
+    usr_key = models.IntegerField(blank=True, db_column='usr_key', null=True)
     status = models.CharField(blank=True, max_length=1, null=True)
     create_time = models.DateTimeField(blank=True, null=True)
     gather_st_time = models.DateTimeField(blank=True, null=True)

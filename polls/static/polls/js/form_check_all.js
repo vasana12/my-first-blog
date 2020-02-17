@@ -32,6 +32,11 @@ $(document).ready(function(){
             }
         var nUrlA = $('input[name="nUrlA"]').val();
         var nUrlB = $('input[name="nUrlB"]').val();
+        if (nUrlA<100||nUrlB<100)
+            {
+                alert("100이상의 수를 입력해 주세요")
+                return false;
+            }
 
     })
 })

@@ -52,6 +52,9 @@ MIDDLEWARE = [
 ]
 ROOT_URLCONF = 'untitled2.urls'
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.request',
+)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

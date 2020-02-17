@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 
 def crawler(pollsBreakdown):
+    print('cralwer 진입')
     channel_crawl.select_channel(int(pollsBreakdown.nUrlA), pollsBreakdown.keywordA[0], pollsBreakdown.channelA[0],
                                  pollsBreakdown.periodA[0], pollsBreakdown.periodA[1], pollsBreakdown.id)
 

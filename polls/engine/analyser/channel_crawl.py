@@ -4,9 +4,8 @@ from threading import Thread
 
 def select_channel(nUrl, keyword, channel, stdate, endate, id) :
 
-    print('select_channel')
     print(nUrl, keyword, channel, stdate, endate, id)
-    if channel == 'Naver_Blog':
+    if channel == 'Naver Blog':
         urlLister1 = crawlLibNaverBlog.NaverBlogLister(nUrl, keyword, channel, stdate,endate, id)
         urlLister1.createNaverBlogUrlList()
 

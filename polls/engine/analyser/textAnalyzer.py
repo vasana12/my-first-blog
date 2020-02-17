@@ -342,7 +342,6 @@ class TextAnalyzer:
                       '부정': str(round(total_neg / total_total * 100, 2)) + '%'}
         value_dict_list.append((value_dict))
 
-        print(value_dict_list)
         value_table = pd.DataFrame(value_dict_list,
                                    columns=('놀람', '기쁨', '기대', '신뢰', '분노', '혐오', '슬픔', '두려움', '긍정', '부정'),
                                    index=['경제적가치', '기능적가치', '사회적가치', '학습적가치', '감성적가치', '환경적가치', 'total', 'total_rate'])
@@ -369,13 +368,12 @@ class TextAnalyzer:
             matching_keyword = []
             matching_count = []
             function = function_list[n]  # 기능을 하나 가지고온다
-            print('function', function)
+
 
             keyword_list = []
             for i, val in enumerate(dict_list):  #
                 if dict_list[i].get('function') == function:  # list 에서 해당 기능과 동일한 값 기능을 가진 row 가 있으면
                     keyword_list.append(dict_list[i].get('keyword'))  # keyword 키값에 해당하는 value 를 keyword_list 에 추가해준다
-            print('function,keyword_list', function, keyword_list)
 
             total_text = self.make_pharse(pharse_list, keyword_list, function,
                                           ntotal)  ### 해당 기능에 대한 키워드가 들어있는 문장을 전부 가져온다
@@ -387,7 +385,7 @@ class TextAnalyzer:
                 sentiment_dict = {'keyword': keyword, 'type': df_sentiment_keyword['type'][i],
                                   'count': count}  # keyword, tyoe, count 사전을 만든다 type= A1 A2 B1 B2 --- 이런식
                 sentiment_dict_list.append(sentiment_dict)
-                print(keyword, count)
+
             df_matching = pd.DataFrame(sentiment_dict_list, columns=(
             'keyword', 'type', 'count'))  ##excel 로 만들어 주기 위한 과정 keyword,type , count 와
 
@@ -424,7 +422,7 @@ class TextAnalyzer:
             for i, val in enumerate(dict_list):  #
                 if dict_list[i].get('function') == function:  # list 에서 해당 기능과 동일한 값 기능을 가진 row 가 있으면
                     keyword_list.append(dict_list[i].get('keyword'))  # keyword 키값에 해당하는 value 를 keyword_list 에 추가해준다
-            print('function,keyword_list', function, keyword_list)
+
 
             total_text = self.make_pharse(pharse_list, keyword_list, function,
                                           ntotal)  ### 해당 기능에 대한 키워드가 들어있는 문장을 전부 가져온다
@@ -436,7 +434,7 @@ class TextAnalyzer:
                 sentiment_dict = {'keyword': keyword, 'type': df_sentiment_keyword['type'][i],
                                   'count': count}  # keyword, tyoe, count 사전을 만든다 type= A1 A2 B1 B2 --- 이런식
                 sentiment_dict_list.append(sentiment_dict)
-                print(keyword, count)
+
             df_matching = pd.DataFrame(sentiment_dict_list, columns=(
             'keyword', 'type', 'count'))  ##excel 로 만들어 주기 위한 과정 keyword,type , count 와
 
